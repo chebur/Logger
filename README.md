@@ -24,7 +24,7 @@ And there are predefined log writers:
 
 ## Usage
 
-### Create string attributes separately from a string
+### Create logger and print debug and info messages
 
 ```swift
 let logger = Logger()
