@@ -12,6 +12,8 @@ import os.activity
 
 public protocol Writer {
     
+    init(subsystem: String, category: String)
+    
     func log(_ message: StaticString, level: Logger.Level, _ args: CVarArg...)
     
     func logv(_ message: StaticString, level: Logger.Level, _ args: [CVarArg])
@@ -27,14 +29,14 @@ extension Writer {
 }
 
 @available(iOS 10, *)
-public class UnifiedLogWriter : Writer {
+public final class UnifiedLogWriter: Writer {
     
     let log: OSLog
     
     public required init(subsystem: String, category: String) {
         self.log = OSLog(subsystem: subsystem, category: category)
     }
-    
+
     private func log(_ message: StaticString, type: OSLogType) {
         os_log(message, log: log, type: type)
     }
@@ -61,7 +63,7 @@ public class UnifiedLogWriter : Writer {
     
     public func logv(_ message: StaticString, level: Logger.Level, _ args: [CVarArg]) {
         let type = UnifiedLogWriter.logType(fromLogLevel: level)
-        
+
         switch args.count {
         case 0:
             log(message, type: type)
@@ -97,7 +99,7 @@ public class UnifiedLogWriter : Writer {
     
 }
 
-public class NSLogWriter : Writer {
+public final class NSLogWriter: Writer {
     
     let subsystem: String?
     
@@ -116,46 +118,6 @@ public class NSLogWriter : Writer {
                 NSLogv("\(message)", pointer)
             }
         }
-    }
-    
-}
-
-public class CompositeLogWriter : Writer, RangeReplaceableCollection {
-    
-    private var writers: [Writer]
-    
-    required public init() {
-        self.writers = []
-    }
-    
-    public func logv(_ message: StaticString, level: Logger.Level, _ args: [CVarArg]) {
-        forEach { $0.logv(message, level: level, args) }
-    }
-    
-    // MARK: Collection
-    
-    public var startIndex: Int {
-        return writers.startIndex
-    }
-    
-    public var endIndex: Int {
-        return writers.endIndex
-    }
-    
-    public subscript (position: Int) -> Writer {
-        get {
-            return writers[position]
-        }
-    }
-    
-    public func index(after i: Int) -> Int {
-        return writers.index(after: i)
-    }
-    
-    // MARK: Range Replaceable Collection
-    
-    public func replaceSubrange<C>(_ subrange: Range<Int>, with newElements: C) where C : Collection, C.Iterator.Element == Writer {
-        writers.replaceSubrange(subrange, with: newElements)
     }
     
 }
