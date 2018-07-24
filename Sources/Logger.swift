@@ -23,15 +23,19 @@ public final class Logger {
         case fault
         
     }
-    
-    public static let `default`: Logger = Logger(subsystem: "", category: "default")
+
+    public static let `default`: Logger = Logger(category: "default")
     
     let writer: Writer
-    
+
     var enabled: Bool = true
     
     init(writer: Writer) {
         self.writer = writer
+    }
+    
+    public convenience init(category: String) {
+        self.init(subsystem: "", category: category)
     }
     
     public required init(subsystem: String, category: String) {
