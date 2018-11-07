@@ -23,28 +23,23 @@ public final class Logger {
         case fault
         
     }
-
-    public static let `default`: Logger = Logger(category: "default")
+    
+    public static let `default`: Logger = {
+        let writer: Writer
+        if #available(iOS 10, *) {
+            writer = UnifiedLogWriter(subsystem: "", category: "default")
+        } else {
+            writer = NSLogWriter()
+        }
+        
+        return Logger(writer: writer)
+    }()
     
     let writer: Writer
 
     var enabled: Bool = true
     
-    init(writer: Writer) {
-        self.writer = writer
-    }
-    
-    public convenience init(category: String) {
-        self.init(subsystem: "", category: category)
-    }
-    
-    public required init(subsystem: String, category: String) {
-        let writer: Writer
-        if #available(iOS 10, *) {
-            writer = UnifiedLogWriter(subsystem: subsystem, category: category)
-        } else {
-            writer = NSLogWriter(subsystem: subsystem, category: category)
-        }
+    public init(writer: Writer) {
         self.writer = writer
     }
     

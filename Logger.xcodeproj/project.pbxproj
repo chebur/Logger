@@ -14,7 +14,7 @@
 /* Begin PBXFileReference section */
 		11A06E661F5F2E4100EA523F /* Logger.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Logger.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		11A06E721F5F2E6800EA523F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		11A06E731F5F2E6800EA523F /* StringAttributes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StringAttributes.h; sourceTree = "<group>"; };
+		11A06E731F5F2E6800EA523F /* Logger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Logger.h; sourceTree = "<group>"; };
 		11A06E7A1F5F38BA00EA523F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		11F776771F7A8EED0059DB7F /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		11F776791F7A8F0A0059DB7F /* Writer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Writer.swift; sourceTree = "<group>"; };
@@ -52,7 +52,7 @@
 			isa = PBXGroup;
 			children = (
 				11A06E721F5F2E6800EA523F /* Info.plist */,
-				11A06E731F5F2E6800EA523F /* StringAttributes.h */,
+				11A06E731F5F2E6800EA523F /* Logger.h */,
 				11F776771F7A8EED0059DB7F /* Logger.swift */,
 				11F776791F7A8F0A0059DB7F /* Writer.swift */,
 			);
