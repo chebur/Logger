@@ -126,6 +126,12 @@ public class MessagesStorage {
     private let backgroundContext: NSManagedObjectContext
     private var tracker: Any?
     
+    /// Initializes the receiver with a store name.
+    ///
+    /// The sqlite file will be created in the library directory of the user domain.
+    ///
+    /// - Parameters:
+    ///     - name: The name of the sqlite file for pesistent storage.
     public convenience init(name: String) throws {
         var logsURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)
             .first?
@@ -172,9 +178,15 @@ public class MessagesStorage {
         container.viewContext.automaticallyMergesChangesFromParent = true
     }
     
-    @available(iOS 11.0, *)
+    /// Tracks and merges remote store changes
+    ///
+    /// For details see the following documentation:
+    /// - [Consuming Relevant Store Changes](https://developer.apple.com/documentation/coredata/consuming_relevant_store_changes)
+    /// - [Persistent History Tracking in Core Data](https://www.avanderlee.com/swift/persistent-history-tracking-core-data/)
+    ///
     /// - Parameters:
     ///     - bundle: Tracker will ignore transactions from the `bundle`.
+    @available(iOS 11.0, *)
     public func enablePersistentHistoryTracking(in bundle: Bundle) {
         let tracker = PersistentHistoryTracker(container: container)
         // only look for transactions created by other targets
@@ -185,8 +197,10 @@ public class MessagesStorage {
         self.tracker = tracker
     }
     
+    /// Inserts a new entity to the store.
+    ///
     /// - Parameters:
-    ///     - completion: A block that is executed by the persistent container against a newly created private context.
+    ///     - completion: A block that is executed by the persistent container against a background context's queue.
     public func append(label: String, level: Logger.Level, message: Logger.Message, metadata: Logger.Metadata?, source: String, file: String, function: String, line: UInt, date: Date = Date(), completion: ((Error?) -> Void)? = nil) {
         backgroundContext.perform { [backgroundContext] in
             do {

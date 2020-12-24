@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import CoreData
 import Logging
 
 public struct CoreDataLogHandler: LogHandler {

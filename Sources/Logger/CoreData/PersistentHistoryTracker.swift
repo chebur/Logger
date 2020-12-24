@@ -13,8 +13,8 @@ import class UIKit.UIApplication
 /// Tracks and merges remote store changes
 ///
 /// See
-/// [Consuming Relevant Store Changes](https://developer.apple.com/documentation/coredata/consuming_relevant_store_changes)
-/// [Persistent History Tracking in Core Data](https://www.avanderlee.com/swift/persistent-history-tracking-core-data/)
+/// - [Consuming Relevant Store Changes](https://developer.apple.com/documentation/coredata/consuming_relevant_store_changes)
+/// - [Persistent History Tracking in Core Data](https://www.avanderlee.com/swift/persistent-history-tracking-core-data/)
 @available(iOS 11.0, OSX 10.13, *)
 final class PersistentHistoryTracker {
     let container: NSPersistentContainer

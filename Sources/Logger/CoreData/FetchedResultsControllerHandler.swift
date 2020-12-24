@@ -12,6 +12,7 @@ import CoreData
 import struct UIKit.NSDiffableDataSourceSnapshot
 import class UIKit.NSDiffableDataSourceSnapshotReference
 
+/// Notifies the receiver about changes to the content in the fetched results controller, by using a diffable data source snapshot.
 @available(iOS 13, *)
 final class FetchedResultsControllerSnapshotHandler<SectionIdentifierType: Hashable, ItemIdentifierType: Hashable>: NSObject, NSFetchedResultsControllerDelegate {
     var didChangeContentWithSnapshot: ((NSFetchedResultsController<NSFetchRequestResult>, NSDiffableDataSourceSnapshot<SectionIdentifierType, ItemIdentifierType>) -> Void)?
@@ -21,6 +22,7 @@ final class FetchedResultsControllerSnapshotHandler<SectionIdentifierType: Hasha
     }
 }
 
+/// Notifies the receiver about changes to the content in the fetched results controller, by using a collection difference.
 @available(iOS 13, *)
 final class FetchedResultsControllerDiffHandler: NSObject, NSFetchedResultsControllerDelegate {
     var didChangeContentWithDiff: ((NSFetchedResultsController<NSFetchRequestResult>, CollectionDifference<NSManagedObjectID>) -> Void)?

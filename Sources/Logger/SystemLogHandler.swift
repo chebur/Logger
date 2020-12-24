@@ -8,6 +8,7 @@
 import Foundation
 import Logging
 
+/// Logs an error message to the Apple System Log facility.
 public struct SystemLogHandler: LogHandler {
     public let label: String
     
