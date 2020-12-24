@@ -27,6 +27,8 @@ final class PersistentHistoryTracker {
     /// ```
     var predicate: NSPredicate?
     
+    var persistentStoreHistoryChangesMergeDidComplete: ((Error?) -> Void)?
+    
     /// An operation queue for processing history transactions.
     private let queue: OperationQueue = {
         $0.maxConcurrentOperationCount = 1
@@ -74,7 +76,9 @@ final class PersistentHistoryTracker {
     
     @objc
     private func persistentStoreDidReceiveRemoteChangeNotification(_ notification: NSNotification) {
-        handlePersistentStoreHistoryChanges()
+        handlePersistentStoreHistoryChanges { [weak self] in
+            self?.persistentStoreHistoryChangesMergeDidComplete?($0)
+        }
     }
     
     @available(iOS, obsoleted: 12, message: "Switch to persistent store remote change notification")
@@ -89,63 +93,62 @@ final class PersistentHistoryTracker {
     @objc
     @available(iOS, obsoleted: 12, message: "Switch to persistent store remote change notification")
     private func applicationDidBecomeActiveNotification(_ notification: NSNotification) {
-        handlePersistentStoreHistoryChanges()
+        handlePersistentStoreHistoryChanges { [weak self] in
+            self?.persistentStoreHistoryChangesMergeDidComplete?($0)
+        }
     }
     
     // MARK: Merging Persistent Store Changes
     
-    private func handlePersistentStoreHistoryChanges() {
+    private func handlePersistentStoreHistoryChanges(completion: ((Error?) -> Void)? = nil) {
         let context = self.context
         
         queue.addOperation { [weak self] in
             // syncronously handle persistent store change on a background context
             context.performAndWait {
-                let result = self?.mergePersistentHistoryChanges(after: self?.token, in: context)
-                if let token = try? result?.get() {
-                    self?.token = token
-                    self?.deletePersistentHistoryChanges(before: token, in: context)
+                do {
+                    if let token = try self?.mergePersistentHistoryChanges(after: self?.token, in: context) {
+                        self?.token = token
+                        try self?.deletePersistentHistoryChanges(before: token, in: context)
+                    }
+                    completion?(nil)
+                } catch {
+                    completion?(error)
                 }
             }
         }
     }
     
     @discardableResult
-    private func mergePersistentHistoryChanges(after token: NSPersistentHistoryToken?, in context: NSManagedObjectContext) -> Result<NSPersistentHistoryToken, Error>? {
-        do {
-            // configure fetch transactions request and filter by predicate when running on iOS 13+
-            let request = NSPersistentHistoryChangeRequest.fetchHistory(after: token)
-            if #available(iOS 13.0, *), let fetchRequest = NSPersistentHistoryTransaction.fetchRequest, let predicate = predicate {
-                fetchRequest.predicate = predicate
-                request.fetchRequest = fetchRequest
-            }
-            
-            // execute fetch transactions request and filter results when running on iOS <13
-            let result = try context.execute(request) as? NSPersistentHistoryResult
-            var transactions = result?.result as? [NSPersistentHistoryTransaction]
-            if #available(iOS 13, *), request.fetchRequest != nil {
-                // results already has been filtered by fetch request predicate condition
-            } else if let predicate = predicate {
-                transactions = transactions?.filter { predicate.evaluate(with: $0) }
-            }
+    private func mergePersistentHistoryChanges(after token: NSPersistentHistoryToken?, in context: NSManagedObjectContext) throws -> NSPersistentHistoryToken? {
+        // configure fetch transactions request and filter by predicate when running on iOS 13+
+        let request = NSPersistentHistoryChangeRequest.fetchHistory(after: token)
+        if #available(iOS 13.0, *), let fetchRequest = NSPersistentHistoryTransaction.fetchRequest, let predicate = predicate {
+            fetchRequest.predicate = predicate
+            request.fetchRequest = fetchRequest
+        }
+        
+        // execute fetch transactions request and filter results when running on iOS <13
+        let result = try context.execute(request) as? NSPersistentHistoryResult
+        var transactions = result?.result as? [NSPersistentHistoryTransaction]
+        if #available(iOS 13, *), request.fetchRequest != nil {
+            // results already has been filtered by fetch request predicate condition
+        } else if let predicate = predicate {
+            transactions = transactions?.filter { predicate.evaluate(with: $0) }
+        }
 
-            for transaction in transactions ?? [] {
-                // merge changes from transaction to view context
-                container.viewContext.performAndWait {
-                    container.viewContext.mergeChanges(fromContextDidSave: transaction.objectIDNotification())
-                }
+        for transaction in transactions ?? [] {
+            // merge changes from transaction to view context
+            container.viewContext.performAndWait {
+                container.viewContext.mergeChanges(fromContextDidSave: transaction.objectIDNotification())
             }
-            let token = transactions?.last?.token
-            return token.flatMap { .success($0) }
-        } catch {
-            return .failure(error)
         }
+        return transactions?.last?.token
     }
     
     @discardableResult
-    private func deletePersistentHistoryChanges(before token: NSPersistentHistoryToken, in context: NSManagedObjectContext) -> Result<NSPersistentStoreResult, Error> {
+    private func deletePersistentHistoryChanges(before token: NSPersistentHistoryToken, in context: NSManagedObjectContext) throws -> NSPersistentStoreResult {
         let request = NSPersistentHistoryChangeRequest.deleteHistory(before: token)
-        return Result {
-            try context.execute(request)
-        }
+        return try context.execute(request)
     }
 }
