@@ -7,13 +7,16 @@
 
 import Foundation
 import CoreData
-
 #if os(iOS)
 import struct UIKit.NSDiffableDataSourceSnapshot
 import class UIKit.NSDiffableDataSourceSnapshotReference
+#elseif os(OSX)
+import struct AppKit.NSDiffableDataSourceSnapshot
+import class AppKit.NSDiffableDataSourceSnapshotReference
+#endif
 
 /// Notifies the receiver about changes to the content in the fetched results controller, by using a diffable data source snapshot.
-@available(iOS 13, *)
+@available(iOS 13, OSX 10.15.1, *)
 final class FetchedResultsControllerSnapshotHandler<SectionIdentifierType: Hashable, ItemIdentifierType: Hashable>: NSObject, NSFetchedResultsControllerDelegate {
     var didChangeContentWithSnapshot: ((NSFetchedResultsController<NSFetchRequestResult>, NSDiffableDataSourceSnapshot<SectionIdentifierType, ItemIdentifierType>) -> Void)?
     
@@ -23,7 +26,7 @@ final class FetchedResultsControllerSnapshotHandler<SectionIdentifierType: Hasha
 }
 
 /// Notifies the receiver about changes to the content in the fetched results controller, by using a collection difference.
-@available(iOS 13, *)
+@available(iOS 13, OSX 10.15, *)
 final class FetchedResultsControllerDiffHandler: NSObject, NSFetchedResultsControllerDelegate {
     var didChangeContentWithDiff: ((NSFetchedResultsController<NSFetchRequestResult>, CollectionDifference<NSManagedObjectID>) -> Void)?
     
@@ -32,7 +35,6 @@ final class FetchedResultsControllerDiffHandler: NSObject, NSFetchedResultsContr
         didChangeContentWithDiff?(controller, diff)
     }
 }
-#endif
 
 /// Notifies the receiver that the fetched results controller has completed processing of one or more changes due to an add, remove, move, or update.
 final class FetchedResultsControllerHandler: NSObject, NSFetchedResultsControllerDelegate {

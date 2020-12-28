@@ -31,7 +31,7 @@ public extension NSManagedObjectContext {
 
 public extension NSManagedObjectContext {
     /// Notifies the receiver about changes to the content in the fetched results controller, by using a collection difference.
-    @available(iOS 13, *)
+    @available(iOS 13, OSX 10.15, *)
     func observe<T: NSFetchRequestResult>(fetchRequest: NSFetchRequest<T>, sectionNameKeyPath: String? = nil, cacheName: String? = nil, didChangeContentWithDiff: @escaping (CollectionDifference<NSManagedObjectID>) -> Void) throws -> FetchedResultsObservation {
         let handler = FetchedResultsControllerDiffHandler()
         handler.didChangeContentWithDiff = { controller, diff in

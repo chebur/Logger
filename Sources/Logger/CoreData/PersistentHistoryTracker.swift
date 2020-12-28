@@ -15,7 +15,7 @@ import class UIKit.UIApplication
 /// See
 /// - [Consuming Relevant Store Changes](https://developer.apple.com/documentation/coredata/consuming_relevant_store_changes)
 /// - [Persistent History Tracking in Core Data](https://www.avanderlee.com/swift/persistent-history-tracking-core-data/)
-@available(iOS 11.0, OSX 10.13, *)
+@available(iOS 11.0, *)
 final class PersistentHistoryTracker {
     let container: NSPersistentContainer
     
@@ -59,13 +59,15 @@ final class PersistentHistoryTracker {
             setPersistentStoreRemoteChangeNotificationObservationEnabled(enabled)
         } else {
             // implement persistent store changes using polling on application did become active notification
+            #if os(iOS)
             setApplicationDidBecomeActiveNotificationObservationEnabled(enabled)
+            #endif
         }
     }
     
     // MARK: Managing Persistent Store Change Notifications
     
-    @available(iOS 12, OSX 10.14, *)
+    @available(iOS 12, *)
     private func setPersistentStoreRemoteChangeNotificationObservationEnabled(_ enabled: Bool) {
         if enabled {
             NotificationCenter.default.addObserver(self, selector: #selector(persistentStoreDidReceiveRemoteChangeNotification(_:)), name: .NSPersistentStoreRemoteChange, object: container.persistentStoreCoordinator)
@@ -81,6 +83,7 @@ final class PersistentHistoryTracker {
         }
     }
     
+    #if os(iOS)
     @available(iOS, obsoleted: 12, message: "Switch to persistent store remote change notification")
     private func setApplicationDidBecomeActiveNotificationObservationEnabled(_ enabled: Bool) {
         if enabled {
@@ -89,6 +92,7 @@ final class PersistentHistoryTracker {
             NotificationCenter.default.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
         }
     }
+    #endif
 
     @objc
     @available(iOS, obsoleted: 12, message: "Switch to persistent store remote change notification")
