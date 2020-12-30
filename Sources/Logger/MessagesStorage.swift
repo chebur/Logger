@@ -11,7 +11,6 @@ import Logging
 
 public class MessagesStorage {
     public struct Message: Hashable {
-        private let managedObjectId: URL
         public let label: String
         public let level: Logger.Level
         public let message: String
@@ -23,16 +22,27 @@ public class MessagesStorage {
         public let date: Date
         
         fileprivate init(entity: Entity) {
-            managedObjectId = entity.objectID.uriRepresentation()
-            label = entity.label
-            level = Logger.Level(rawValue: entity.level) ?? .debug
-            message = entity.message
-            metadata = entity.metadata.flatMap { try? JSONDecoder().decode(Logger.Metadata.self, from: $0) }
-            source = entity.source
-            file = entity.file
-            function = entity.function
-            line = UInt(entity.line.int64Value)
-            date = entity.date
+            self.init(label: entity.label,
+                      level: Logger.Level(rawValue: entity.level) ?? .debug,
+                      message: entity.message,
+                      metadata: entity.metadata.flatMap { try? JSONDecoder().decode(Logger.Metadata.self, from: $0) },
+                      source: entity.source,
+                      file: entity.file,
+                      function: entity.function,
+                      line: UInt(entity.line.int64Value),
+                      date: entity.date)
+        }
+        
+        public init(label: String, level: Logger.Level, message: String, metadata: Logger.Metadata? = nil, source: String, file: String, function: String, line: UInt, date: Date) {
+            self.label = label
+            self.level = level
+            self.message = message
+            self.metadata = metadata
+            self.source = source
+            self.file = file
+            self.function = function
+            self.line = line
+            self.date = date
         }
     }
     
