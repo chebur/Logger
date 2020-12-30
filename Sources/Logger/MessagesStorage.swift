@@ -287,8 +287,13 @@ private extension Collection where Element == Logger.MetadataValue {
     }
 }
 
+private extension Dictionary where Key == String, Value == Logger.MetadataValue {
+    func normalized() -> String {
+        return values.normalized()
+    }
+}
+
 extension Logger.MetadataValue: Hashable, Codable {
-    
     fileprivate func normalized() -> String {
         switch self {
         case .string(let string):
@@ -296,7 +301,7 @@ extension Logger.MetadataValue: Hashable, Codable {
         case .stringConvertible(let stringConvertible):
             return "\(stringConvertible)"
         case .dictionary(let metadata):
-            return metadata.values.normalized()
+            return metadata.normalized()
         case .array(let values):
             return values.normalized()
         }
