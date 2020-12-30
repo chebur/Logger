@@ -132,7 +132,7 @@ public class MessagesStorage {
     ///
     /// - Parameters:
     ///     - name: The name of the sqlite file for pesistent storage.
-    public convenience init(name: String) throws {
+    public convenience init(name: String, completionHandler: ((NSPersistentStoreDescription, Error?) -> Void)? = nil) throws {
         var logsURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)
             .first?
             .appendingPathComponent("Logs", isDirectory: true) ?? URL(fileURLWithPath: "/dev/null")
@@ -146,7 +146,7 @@ public class MessagesStorage {
         }
 
         let storeURL = logsURL.appendingPathComponent("\(name).sqlite", isDirectory: false)
-        self.init(url: storeURL)
+        self.init(url: storeURL, completionHandler: completionHandler)
     }
     
     /// Initializes the receiver with a URL for the store.
